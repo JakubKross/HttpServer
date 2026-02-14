@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="RaspberryPi (fa849925-45b1-4b2b-a3b3-6ea41750eb9f)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.RKQ1mxnz6j/HttpServer" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-raspberrypi" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
