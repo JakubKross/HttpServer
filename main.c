@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #define PORT 8080
 
@@ -36,30 +37,43 @@ int main() {
     printf("Serwer Uruchomiony");
 
     while (1) {
-        printf("\n Czekam na połączenie...http://%s:%d\n", "192.168.0.86", PORT);
-        new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+       if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
+           perror("Accept failed");
+           continue;
+       }
+        char buffer[1024] = {0};
+        read(new_socket, buffer, 1024);
+        char *querry = strstr(buffer, "GET /");
+        if (strstr(buffer, "GET /status")) {
+            float temp = 24.5;
+            int uptime = clock() / CLOCKS_PER_SEC;
 
+            char body[256];
+            snprintf(body, sizeof(body), "Status systemu:\nTemperatura: %.2f C\n Uptime: %d sekund", temp, uptime);
 
-        if (new_socket <0) {
-            continue;
+            char header[512];
+            snprintf(header, sizeof(header), "HTTP/1.1 200 OK\nContent-Type: text/plain; charset=utf-8\nContent-Length: %zu\n\n\n%s",strlen(body), body);
+            write(new_socket, header, strlen(header));
         }
-        printf("Klient Połączony\n");
-        char buffer[2048] = {0};
-        long valread = read(new_socket, buffer, 2048);
-        if (valread > 0) {
-            printf("Otrzymano dane od przeglądarki:\n%s\n", buffer);
+        if (querry) {
+            if (strstr(buffer, "led=on")) {
+                char *resp= "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nDIODA WLACZONA";
+                write(new_socket, resp, strlen(resp));
+            }
+            else if (strstr(buffer, "led=off")) {
+                char *resp = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nDIODA WYLACZONA";
+            }else {
+                char *html_form =
+                    "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+                "<html><body>"
+                "<h1>Sterowanie LED</h1>"
+                "<a href=\"/?led=on\"><button>WLACZ</button></a>"
+                "<a href=\"/?led=off\"><button>WYLACZ</button></a>"
+                "</body></html>";
+                write(new_socket, html_form, strlen(html_form));
+            }
         }
 
-        char *response = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n"
-        "Content-Length: 13\r\n"
-        "Connection: Close\r\n"
-        "\r\n"
-        "Hello World!\n";
-
-        send(new_socket, response, strlen(response), 0);
-        printf("Odpowiedź wysłana.\n");
-
-        shutdown(new_socket, SHUT_RDWR);
         close(new_socket);
     }
     return 0;
