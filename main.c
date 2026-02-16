@@ -45,15 +45,18 @@ int main() {
         } else if(strstr(buffer, "led_on")){
             char *resp = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nDIODA WYLACZONA";
             write(new_socket, resp, strlen(resp));
+        }else if(strstr(buffer, "led_off")){
+            char *resp = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nDIODA WYLACZONA";
+            write(new_socket, resp, strlen(resp));
         }
         else if (strstr(buffer, "GET / ")){
             char *html_form = 
-            "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+            "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\n\n"
             "<html><body>"
             "<h1>Sterowanie LED</h1>"
             "<a href=\"/?led=on\"><button>WLACZ</button></a>"
-            "<a> href=\"/?led=off\"><button>WYLACZ</button></a>"
-            "<br><br><a hre\"/status\">Sprawdz status</a>"
+            "<a href=\"/?led=off\"><button>WYLACZ</button></a>"
+            "<br><br><a href=\"/status\">Sprawdz status</a>"
             "</body></html>";
             write(new_socket, html_form, strlen(html_form));
         }
